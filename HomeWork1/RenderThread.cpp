@@ -23,8 +23,8 @@ RenderThread::RenderThread(RenderEngine* pRenderEngine) :
 {
 	m_nMainThreadId = ::GetCurrentThreadId();
 
-	m_Commands[0].clear();
-	m_Commands[1].clear();
+	m_Commands[0].Clear();
+	m_Commands[1].Clear();
 }
 
 RenderThread::~RenderThread()
@@ -105,7 +105,7 @@ void RenderThread::ProcessCommands()
 
 	while (n < m_Commands[m_nCurrentFrame].capacity())
 	{
-		byte* ptr = m_Commands[m_nCurrentFrame].data() + n;
+		byte* ptr = m_Commands[m_nCurrentFrame]() + n;
 		n += sizeof(UINT32);
 		UINT32 nCommandType =*((UINT32*)ptr);
 
@@ -150,14 +150,14 @@ void RenderThread::ProcessCommands()
 		}
 	}
 
-	m_Commands[m_nCurrentFrame].shrink_to_fit();
+	m_Commands[m_nCurrentFrame].Clear();
 }
 
 // We process comands via byte* using std::vector as raw data.
 template <class T>
 T RenderThread::ReadCommand(int& nIndex)
 {
-	byte* Res = m_Commands[m_nCurrentFrame].data() + nIndex;
+	byte* Res = m_Commands[m_nCurrentFrame]() + nIndex;
 	nIndex += sizeof(T);
 	return *reinterpret_cast<const T*>(Res);
 }
@@ -165,13 +165,14 @@ T RenderThread::ReadCommand(int& nIndex)
 byte* RenderThread::AddCommand(RenderCommand eRC, size_t nParamBytes)
 {
 	UINT32 cmdSize = sizeof(RenderCommand) + nParamBytes;
-	byte* storage = new byte[m_Commands[m_nFrameFill].capacity()];
+	//byte* storage = new byte[m_Commands[m_nFrameFill].capacity()];
 
-	memcpy(storage, m_Commands[m_nFrameFill].data(), m_Commands[m_nFrameFill].capacity());
-	m_Commands[m_nFrameFill].reserve(m_Commands[m_nFrameFill].capacity() * sizeof(byte) + cmdSize);
-	memcpy(m_Commands[m_nFrameFill].data(), storage, m_Commands[m_nFrameFill].capacity() - cmdSize);
+	//memcpy(storage, m_Commands[m_nFrameFill].data(), m_Commands[m_nFrameFill].capacity());
+	//m_Commands[m_nFrameFill].reserve(m_Commands[m_nFrameFill].capacity() * sizeof(byte) + cmdSize);
+	//memcpy(m_Commands[m_nFrameFill].data(), storage, m_Commands[m_nFrameFill].capacity() - cmdSize);
 
-	byte* ptr = m_Commands[m_nFrameFill].data() + m_Commands[m_nFrameFill].capacity() * sizeof(byte) - cmdSize;
+	//byte* ptr = m_Commands[m_nFrameFill].data() + m_Commands[m_nFrameFill].capacity() * sizeof(byte) - cmdSize;
+	byte* ptr = m_Commands[m_nFrameFill].Resize(m_Commands[m_nFrameFill].capacity() * sizeof(byte) + cmdSize);
 	AddDWORD(ptr, eRC);
 	return ptr;
 }
@@ -296,7 +297,7 @@ void RenderThread::SyncMainWithRender()
 	{
 		LOADINGCOMMAND_CRITICAL_SECTION;
 		NextFrame();
-		m_Commands[m_nFrameFill].shrink_to_fit();
+		m_Commands[m_nFrameFill].Clear();
 	}
 
 	SignalRenderThread();
