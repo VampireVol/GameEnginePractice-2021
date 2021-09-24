@@ -5,7 +5,7 @@ Game::Game() :
 {
 	m_pRenderEngine = new RenderEngine();
 
-	for (int i = 0; i < 7; ++i)
+	for (int i = 0; i < 5; ++i)
 	{
 		m_Planets.push_back(Planet((i + 1) * 100));
 	}

@@ -20,7 +20,7 @@ RenderEngine::RenderEngine() :
 	m_pRT->RC_LoadDefaultResources();
 	m_pRT->RC_LoadMesh("sphere");
 	//m_pRT->RC_CreateSphere(0);
-	for (int i = 0; i < 7; ++i)
+	for (int i = 0; i < 5; ++i)
 	{
 		m_pRT->RC_CreateSphere(i);
 	}
@@ -96,10 +96,10 @@ void RenderEngine::RT_SetupDefaultCamera()
 {
 	m_pCamera = m_pSceneManager->createCamera("Main Camera");
 
-	m_pCamera->setPosition(Ogre::Vector3(0, 100, 150));
+	m_pCamera->setPosition(Ogre::Vector3(300, 600, 650));
 	m_pCamera->lookAt(Ogre::Vector3(0, 0, 0));
 	m_pCamera->setNearClipDistance(0.2f);
-	m_pCamera->setFarClipDistance(1000.0f);
+	m_pCamera->setFarClipDistance(2000.0f);
 	m_pCamera->setAutoAspectRatio(true);
 }
 
@@ -216,6 +216,7 @@ void RenderEngine::LoadHlms(Ogre::ConfigFile& cf)
 		//Create and register
 		hlmsPbs = OGRE_NEW Ogre::HlmsPbs(archivePbs, &archivePbsLibraryFolders);
 		Ogre::Root::getSingleton().getHlmsManager()->registerHlms(hlmsPbs);
+		Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(true);
 	}
 
 
@@ -231,13 +232,14 @@ void RenderEngine::LoadHlms(Ogre::ConfigFile& cf)
 	}
 }
 
-void RenderEngine::RT_LoadMesh(const Ogre::String &meshName)
+void RenderEngine::RT_LoadMesh(const Ogre::String &_meshName)
 {
 	//Load the v1 mesh. Notice the v1 namespace
 	//Also notice the HBU_STATIC flag; since the HBU_WRITE_ONLY
 	//bit would prohibit us from reading the data for importing.
 	Ogre::v1::MeshPtr v1Mesh;
 	Ogre::MeshPtr v2Mesh;
+	Ogre::String meshName = "cube";
 
 	v1Mesh = Ogre::v1::MeshManager::getSingleton().load(
 		meshName + ".mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
@@ -265,11 +267,47 @@ void RenderEngine::RT_LoadMesh(const Ogre::String &meshName)
 		Ogre::ResourceGroupManager::
 		AUTODETECT_RESOURCE_GROUP_NAME,
 		Ogre::SCENE_DYNAMIC);
+
+	/*Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(Ogre::Root::getSingleton().getHlmsManager()->getHlms(Ogre::HLMS_PBS));
+
+	Ogre::String datablockName = "Sky";
+
+
+	Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmsPbs->createDatablock("Sun", "Sun", Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec(), true, "Sun.material.json"));
+	datablock->setTexture(Ogre::PBSM_DIFFUSE, "2k_sun.jpg");*/
+
+	//datablock->setDiffuse(Ogre::Vector3(0.0f, 5.0f, 0.0f));
+
+	Ogre::HlmsManager* hlmsManager = m_pRoot->getHlmsManager();
+
+	dynamic_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
+
+	Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
+
+	Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(
+		hlmsPbs->createDatablock("Test",
+			"Test",
+			Ogre::HlmsMacroblock(),
+			Ogre::HlmsBlendblock(),
+			Ogre::HlmsParamVec()));
+
+	/*datablock->setWorkflow(Ogre::HlmsPbsDatablock::MetallicWorkflow);
+	datablock->setDiffuse(Ogre::Vector3(0.0f, 2.0f, 0.0f));
+	datablock->setMetalness(1.0f);
+	datablock->setEmissive(Ogre::Vector3(0.2f, 0.0f, 0.0f));*/
+	datablock->setDiffuse(Ogre::Vector3(16.0f, 16.0f, 16.0f));
+	datablock->setTexture(Ogre::PBSM_DIFFUSE, "2k_sun.jpg");
+
+	item->setDatablock(datablock);
+
+
 	Ogre::SceneNode* sceneNode = m_pSceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)->
 		createChildSceneNode(Ogre::SCENE_DYNAMIC);
 	sceneNode->setName("Sphere Node");
 	sceneNode->attachObject(item);
-	sceneNode->scale(0.1f, 0.1f, 0.1f);
+	//sceneNode->scale(0.1f, 0.1f, 0.1f);
+	//Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(Ogre::Root::getSingleton().getHlmsManager()->getHlms("Sun.material.json"));
+	//item->setDatablockOrMaterialName("Sun.material.json");
 	//m_pSceneManager->setSky(true, Ogre::SceneManager::SkyCubemap, "spacesky", "Popular");
 	//auto s = m_pSceneManager->getSkyMaterial();
 	//s->set
@@ -287,7 +325,7 @@ void RenderEngine::RT_LoadMesh(const Ogre::String &meshName)
 
 void RenderEngine::RT_CreateSphere(const size_t& index)
 {
-	Ogre::Item* item = m_pSceneManager->createItem("sphere.mesh Imported",
+	Ogre::Item* item = m_pSceneManager->createItem("cube.mesh Imported",
 		Ogre::ResourceGroupManager::
 		AUTODETECT_RESOURCE_GROUP_NAME,
 		Ogre::SCENE_DYNAMIC);
@@ -295,6 +333,22 @@ void RenderEngine::RT_CreateSphere(const size_t& index)
 		getChild(0))->createChildSceneNode(Ogre::SCENE_DYNAMIC);
 	sceneNode->attachObject(item);
 	sceneNode->scale(0.2f, 0.2f, 0.2f);
+	Ogre::HlmsManager* hlmsManager = m_pRoot->getHlmsManager();
+
+	dynamic_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
+
+	Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
+	std::string name = "test";
+	name += index;
+	Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(
+		hlmsPbs->createDatablock(name,
+			name,
+			Ogre::HlmsMacroblock(),
+			Ogre::HlmsBlendblock(),
+			Ogre::HlmsParamVec()));
+	datablock->setDiffuse(Ogre::Vector3(16.0f, 16.0f, 16.0f));
+	datablock->setTexture(Ogre::PBSM_DIFFUSE, std::to_string(index) + "s.jpg");
+	item->setDatablock(datablock);
 }
 
 void RenderEngine::RT_SetupDefaultLight()
