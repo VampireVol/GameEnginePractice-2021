@@ -18,9 +18,11 @@ enum RenderCommand : UINT32
 	eRC_SetupDefaultCamera,
 	eRC_SetupDefaultCompositor,
 	eRC_LoadDefaultResources,
-	eRC_LoadOgreHead,
+	eRC_LoadSphere,
+	eRC_CreateSphere,
 	eRC_SetupDefaultLight,
 	eRC_OscillateCamera,
+	eRC_MovePlanet,
 	eRC_BeginFrame,
 	eRC_EndFrame
 };
@@ -38,9 +40,11 @@ public:
 	void RC_SetupDefaultCamera();
 	void RC_SetupDefaultCompositor();
 	void RC_LoadDefaultResources();
-	void RC_LoadOgreHead();
+	void RC_LoadMesh(const Ogre::String& meshName);
+	void RC_CreateSphere(const size_t &index);
 	void RC_SetupDefaultLight();
 	void RC_OscillateCamera(float time);
+	void RC_MovePlanet(const UINT32& index, const Ogre::Vector3& pos);
 	void RC_BeginFrame();
 	void RC_EndFrame();
 

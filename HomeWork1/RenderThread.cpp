@@ -131,9 +131,15 @@ void RenderThread::ProcessCommands()
 			m_pRenderEngine->RT_LoadDefaultResources();
 			break;
 		}
-		case eRC_LoadOgreHead:
+		case eRC_LoadSphere:
 		{
-			m_pRenderEngine->RT_LoadOgreHead();
+			m_pRenderEngine->RT_LoadMesh("sphere");
+			break;
+		}
+		case eRC_CreateSphere:
+		{
+			auto index = ReadCommand<DWORD>(n);
+			m_pRenderEngine->RT_CreateSphere(index);
 			break;
 		}
 		case eRC_SetupDefaultLight:
@@ -145,6 +151,15 @@ void RenderThread::ProcessCommands()
 		{
 			float time = ReadCommand<float>(n);
 			m_pRenderEngine->RT_OscillateCamera(time);
+			break;
+		}
+		case eRC_MovePlanet:
+		{
+			auto index = ReadCommand<DWORD>(n);
+			float x = ReadCommand<float>(n);
+			float y = ReadCommand<float>(n);
+			float z = ReadCommand<float>(n);
+			m_pRenderEngine->RC_MovePlanet(index, { x, y, z });
 			break;
 		}
 		}
@@ -237,16 +252,29 @@ void RenderThread::RC_LoadDefaultResources()
 	byte* p = AddCommand(eRC_LoadDefaultResources, 0);
 }
 
-void RenderThread::RC_LoadOgreHead()
+void RenderThread::RC_LoadMesh(const Ogre::String &meshName)
 {
 	if (IsRenderThread())
 	{
-		m_pRenderEngine->RT_LoadOgreHead();
+		m_pRenderEngine->RT_LoadMesh(meshName);
 		return;
 	}
 
 	LOADINGCOMMAND_CRITICAL_SECTION;
-	byte* p = AddCommand(eRC_LoadOgreHead, 0);
+	byte* p = AddCommand(eRC_LoadSphere, 0);
+}
+
+void RenderThread::RC_CreateSphere(const size_t& index)
+{
+	if (IsRenderThread())
+	{
+		m_pRenderEngine->RT_CreateSphere(index);
+		return;
+	}
+
+	LOADINGCOMMAND_CRITICAL_SECTION;
+	byte* p = AddCommand(eRC_CreateSphere, sizeof(DWORD));
+	AddDWORD(p, index);
 }
 
 void RenderThread::RC_SetupDefaultLight()
@@ -272,6 +300,22 @@ void RenderThread::RC_OscillateCamera(float time)
 	LOADINGCOMMAND_CRITICAL_SECTION;
 	byte* p = AddCommand(eRC_OscillateCamera, sizeof(float));
 	AddFloat(p, time);
+}
+
+void RenderThread::RC_MovePlanet(const UINT32& index, const Ogre::Vector3& pos)
+{
+	if (IsRenderThread())
+	{
+		m_pRenderEngine->RC_MovePlanet(index, pos);
+		return;
+	}
+
+	LOADINGCOMMAND_CRITICAL_SECTION;
+	byte* p = AddCommand(eRC_MovePlanet, sizeof(DWORD) + 3 * sizeof(float));
+	AddDWORD(p, index);
+	AddFloat(p, pos.x);
+	AddFloat(p, pos.y);
+	AddFloat(p, pos.z);
 }
 
 void RenderThread::RC_BeginFrame()

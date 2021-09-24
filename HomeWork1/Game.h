@@ -2,6 +2,7 @@
 
 #include "RenderEngine.h"
 #include "GameTimer.h"
+#include "Planet.h"
 
 class Game
 {
@@ -17,5 +18,6 @@ public:
 private:
 	GameTimer m_Timer;
 	RenderEngine* m_pRenderEngine;
+	std::vector<Planet> m_Planets;
 };
 

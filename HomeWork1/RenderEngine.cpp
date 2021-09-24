@@ -18,7 +18,12 @@ RenderEngine::RenderEngine() :
 	m_pRT->RC_SetupDefaultCamera();
 	m_pRT->RC_SetupDefaultCompositor();
 	m_pRT->RC_LoadDefaultResources();
-	m_pRT->RC_LoadOgreHead();
+	m_pRT->RC_LoadMesh("sphere");
+	//m_pRT->RC_CreateSphere(0);
+	for (int i = 0; i < 7; ++i)
+	{
+		m_pRT->RC_CreateSphere(i);
+	}
 	m_pRT->RC_SetupDefaultLight();
 
 	m_pRT->Start();
@@ -27,6 +32,12 @@ RenderEngine::RenderEngine() :
 RenderEngine::~RenderEngine()
 {
 	SAFE_OGRE_DELETE(m_pRoot);
+	SAFE_OGRE_DELETE(m_pRenderWindow);
+	SAFE_OGRE_DELETE(m_pSceneManager);
+	SAFE_OGRE_DELETE(m_pD3D11Plugin);
+	SAFE_OGRE_DELETE(m_pCamera);
+	SAFE_OGRE_DELETE(m_pWorkspace);
+	SAFE_OGRE_DELETE(m_pRT);
 }
 
 bool RenderEngine::SetOgreConfig()
@@ -85,7 +96,7 @@ void RenderEngine::RT_SetupDefaultCamera()
 {
 	m_pCamera = m_pSceneManager->createCamera("Main Camera");
 
-	m_pCamera->setPosition(Ogre::Vector3(0, 10, 15));
+	m_pCamera->setPosition(Ogre::Vector3(0, 100, 150));
 	m_pCamera->lookAt(Ogre::Vector3(0, 0, 0));
 	m_pCamera->setNearClipDistance(0.2f);
 	m_pCamera->setFarClipDistance(1000.0f);
@@ -220,7 +231,7 @@ void RenderEngine::LoadHlms(Ogre::ConfigFile& cf)
 	}
 }
 
-void RenderEngine::RT_LoadOgreHead()
+void RenderEngine::RT_LoadMesh(const Ogre::String &meshName)
 {
 	//Load the v1 mesh. Notice the v1 namespace
 	//Also notice the HBU_STATIC flag; since the HBU_WRITE_ONLY
@@ -229,12 +240,12 @@ void RenderEngine::RT_LoadOgreHead()
 	Ogre::MeshPtr v2Mesh;
 
 	v1Mesh = Ogre::v1::MeshManager::getSingleton().load(
-		"ogrehead.mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
+		meshName + ".mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
 		Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);
 
 	//Create a v2 mesh to import to, with a different name (arbitrary).
 	v2Mesh = Ogre::MeshManager::getSingleton().createManual(
-		"ogrehead.mesh Imported", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+		meshName + ".mesh Imported", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
 	bool halfPosition = true;
 	bool halfUVs = true;
@@ -250,19 +261,18 @@ void RenderEngine::RT_LoadOgreHead()
 	//Create an Item with the model we just imported.
 	//Notice we use the name of the imported model. We could also use the overload
 	//with the mesh pointer:
-	Ogre::Item* item = m_pSceneManager->createItem("ogrehead.mesh Imported",
+	Ogre::Item* item = m_pSceneManager->createItem(meshName + ".mesh Imported",
 		Ogre::ResourceGroupManager::
 		AUTODETECT_RESOURCE_GROUP_NAME,
 		Ogre::SCENE_DYNAMIC);
 	Ogre::SceneNode* sceneNode = m_pSceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)->
 		createChildSceneNode(Ogre::SCENE_DYNAMIC);
+	sceneNode->setName("Sphere Node");
 	sceneNode->attachObject(item);
-	
-	auto ogre2 = m_pSceneManager->createItem("ogrehead.mesh Imported");
-	auto sceneNode2 = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_DYNAMIC, Ogre::Vector3(0, 5, 4));
-	sceneNode2->attachObject(ogre2);
-	
-
+	sceneNode->scale(0.1f, 0.1f, 0.1f);
+	//m_pSceneManager->setSky(true, Ogre::SceneManager::SkyCubemap, "spacesky", "Popular");
+	//auto s = m_pSceneManager->getSkyMaterial();
+	//s->set
 	//sceneNode->attachObject(item);
 	//auto material = Ogre::MaterialManager::getSingleton().create("Ogre1", "Group");
 	//material->setSelfIllumination(1, 0, 0);
@@ -270,10 +280,21 @@ void RenderEngine::RT_LoadOgreHead()
 	//sceneNode->attachObject(sphere);
 	//item->setMaterialName("Ogre");
 	//item->setMaterialName("Ogre1");
-	sceneNode->scale(0.1f, 0.1f, 0.1f);
-	sceneNode2->scale(0.1f, 0.1f, 0.1f);
+	
 	//Ogre::TextureManager
 	//m_pSceneManager->setSky()
+}
+
+void RenderEngine::RT_CreateSphere(const size_t& index)
+{
+	Ogre::Item* item = m_pSceneManager->createItem("sphere.mesh Imported",
+		Ogre::ResourceGroupManager::
+		AUTODETECT_RESOURCE_GROUP_NAME,
+		Ogre::SCENE_DYNAMIC);
+	Ogre::SceneNode* sceneNode = ((Ogre::SceneNode*) m_pSceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)->
+		getChild(0))->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+	sceneNode->attachObject(item);
+	sceneNode->scale(0.2f, 0.2f, 0.2f);
 }
 
 void RenderEngine::RT_SetupDefaultLight()
@@ -289,5 +310,11 @@ void RenderEngine::RT_SetupDefaultLight()
 
 void RenderEngine::RT_OscillateCamera(float time)
 {
-	m_pCamera->setPosition(Ogre::Vector3(0, 10, 15));
+	//m_pCamera->setPosition(Ogre::Vector3(0, time, 15));
+}
+
+void RenderEngine::RC_MovePlanet(const UINT32& index, const Ogre::Vector3& pos)
+{
+	Ogre::Node* sceneNode = m_pSceneManager->getRootSceneNode()->getChild(0)->getChild(index);
+	sceneNode->setPosition(pos);
 }

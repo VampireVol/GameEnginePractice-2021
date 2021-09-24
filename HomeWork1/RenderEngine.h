@@ -44,9 +44,11 @@ private:
 	void RT_SetupDefaultCamera();
 	void RT_SetupDefaultCompositor();
 	void RT_LoadDefaultResources();
-	void RT_LoadOgreHead();
+	void RT_LoadMesh(const Ogre::String& meshName);
+	void RT_CreateSphere(const size_t& index);
 	void RT_SetupDefaultLight();
 	void RT_OscillateCamera(float time);
+	void RC_MovePlanet(const UINT32& index, const Ogre::Vector3& pos);
 
 	Ogre::Root* m_pRoot;
 	Ogre::Window* m_pRenderWindow;

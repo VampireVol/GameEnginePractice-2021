@@ -159,6 +159,7 @@
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="MTQueue.h" />
+    <ClInclude Include="Planet.h" />
     <ClInclude Include="RenderEngine.h" />
     <ClInclude Include="ProjectDefines.h" />
     <ClInclude Include="RenderThread.h" />
@@ -169,6 +170,7 @@
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MTQueue.cpp" />
+    <ClCompile Include="Planet.cpp" />
     <ClCompile Include="RenderEngine.cpp" />
     <ClCompile Include="RenderThread.cpp" />
   </ItemGroup>
