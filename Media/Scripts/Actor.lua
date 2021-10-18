@@ -1,8 +1,5 @@
 Entity = {
     Properties = {
-        Name = "Static",
-        MeshName = "ogrehead.mesh",
-        
         Controllable = 0,
         HasPhysics = 0,
         IsStatic = 1
@@ -23,6 +20,12 @@ end
 
 Entity.GetPosition = function()
     return Entity.position;
+end
+
+Entity.SetPosition = function(x, y, z)
+    Entity.position.x = x;
+    Entity.position.y = y;
+    Entity.position.z = z;
 end
 
 Entity.GetOrientation = function()
