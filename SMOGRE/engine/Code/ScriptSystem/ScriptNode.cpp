@@ -47,7 +47,11 @@ ScriptNode::ScriptNode(std::string strScriptPath, InputHandler* pInputHandler, f
 		Ogre::Quaternion vOrientation = GetOrientation();
 		ent.set(Orientation{ vOrientation.w, vOrientation.x , vOrientation.y, vOrientation.z });
 	}
-
+	struct stat result;
+	if (stat(m_strScriptPath.c_str(), &result) == 0)
+	{
+		mod_time = result.st_mtime;
+	}
 }
 
 ScriptNode::~ScriptNode()
@@ -57,6 +61,7 @@ ScriptNode::~ScriptNode()
 
 void ScriptNode::Update(float dt)
 {
+	ReloadScript();
 	luabridge::LuaRef object = luabridge::getGlobal(m_script, m_EntityFieldName);
 	object[m_OnUpdateFunctionName](dt);
 }
@@ -114,32 +119,41 @@ std::string ScriptNode::GetMeshName() const
 
 void ScriptNode::ReloadScript()
 {
-	luabridge::LuaRef currentObject = luabridge::getGlobal(m_script, m_EntityFieldName);
-
-	lua_State* script = luaL_newstate();
-	luaL_openlibs(script);
-
-	AddDependencies(script);
-
-	luaL_dofile(script, m_strScriptPath.c_str());
-	lua_pcall(script, 0, 0, 0);
-
-	luabridge::LuaRef object = luabridge::getGlobal(script, m_EntityFieldName);
-	luabridge::LuaRef parameters = object[m_ParametersFieldName];
-	luabridge::Range parametersRange = luabridge::pairs(parameters);
-
-	if (parameters.isNil())
+	struct stat result;
+	if (stat(m_strScriptPath.c_str(), &result) == 0)
 	{
-		return;
-	}
+		time_t curr_mod_time = result.st_mtime;
+		if (mod_time != curr_mod_time)
+		{
+			mod_time = curr_mod_time;
+			luabridge::LuaRef currentObject = luabridge::getGlobal(m_script, m_EntityFieldName);
 
-	std::string strParameterName;
-	float fValue;
-	for (auto it = parametersRange.begin(); it != parametersRange.end(); ++it)
-	{
-		strParameterName = it.key().cast<std::string>();
-		fValue = it.value().cast<float>();
-		currentObject[m_ParametersFieldName][strParameterName] = fValue;
+			lua_State* script = luaL_newstate();
+			luaL_openlibs(script);
+
+			AddDependencies(script);
+
+			luaL_dofile(script, m_strScriptPath.c_str());
+			lua_pcall(script, 0, 0, 0);
+
+			luabridge::LuaRef object = luabridge::getGlobal(script, m_EntityFieldName);
+			luabridge::LuaRef parameters = object[m_ParametersFieldName];
+
+			if (parameters.isNil() || parameters == -1)
+			{
+				return;
+			}
+
+			luabridge::Range parametersRange = luabridge::pairs(parameters);
+			std::string strParameterName;
+			float fValue;
+			for (auto it = parametersRange.begin(); it != parametersRange.end(); ++it)
+			{
+				strParameterName = it.key().cast<std::string>();
+				fValue = it.value().cast<float>();
+				currentObject[m_ParametersFieldName][strParameterName] = fValue;
+			}
+		}
 	}
 }
 

@@ -24,6 +24,9 @@ public:
 	Ogre::Quaternion GetOrientation() const;
 	void SetOrientation(Ogre::Quaternion position);
 
+	Ogre::Vector3 GetScale() const;
+	void SetScale(Ogre::Vector3 scale);
+
 	void EnableCamera(bool bEnableCamera = true);
 	bool IsCameraEnabled() const;
 
@@ -37,6 +40,7 @@ private:
 	Ogre::Vector3 m_vPosition;
 	Ogre::Vector3 m_vCameraPosition;
 	Ogre::Quaternion m_vOrientation;
+	Ogre::Vector3 m_scale;
 
 	uint32_t m_nIdx;
 	Ogre::String m_strName;

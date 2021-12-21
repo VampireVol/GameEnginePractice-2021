@@ -62,6 +62,9 @@ void RenderEngine::Update()
 		Ogre::Quaternion orientation = pRenderNode->GetOrientation();
 		pRenderNode->GetSceneNode()->setOrientation(orientation);
 
+		//Ogre::Vector3 vScale = pRenderNode->GetScale();
+		//pRenderNode->GetSceneNode()->scale(vScale);
+
 		if (pRenderNode->IsCameraEnabled())
 		{
 			m_pCamera->setPosition(pRenderNode->GetCameraPosition());
@@ -70,7 +73,17 @@ void RenderEngine::Update()
 	}
 
 	if (m_pRenderWindow->isVisible())
-		m_bQuit |= !m_pRoot->renderOneFrame();
+	{
+		if (m_pRenderWindow->isClosed())
+		{
+			m_bQuit = true;
+			return;
+		}
+		else
+		{
+			m_bQuit |= !m_pRoot->renderOneFrame();
+		}
+	}
 }
 
 void RenderEngine::RT_Init()
@@ -134,18 +147,42 @@ void RenderEngine::RT_CreateSceneNode(RenderNode* pRenderNode)
 	//Create an Item with the model we just imported.
 	//Notice we use the name of the imported model. We could also use the overload
 	//with the mesh pointer:
+	Ogre::Item* item;
 	Ogre::String strImportedMeshName = pRenderNode->GetMeshName() + "v1";
 	if (!Ogre::MeshManager::getSingleton().resourceExists(strImportedMeshName))
-		ImportV1Mesh(pRenderNode->GetMeshName());
+	{
+		try
+		{
+			item = m_pSceneManager->createItem(pRenderNode->GetMeshName(),
+				Ogre::ResourceGroupManager::
+				AUTODETECT_RESOURCE_GROUP_NAME,
+				Ogre::SCENE_DYNAMIC);
+			item->setName(pRenderNode->GetMeshName());
+			Ogre::SceneNode* pSceneNode = m_pSceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)->
+				createChildSceneNode(Ogre::SCENE_DYNAMIC);
+			pSceneNode->attachObject(item);
+			pSceneNode->scale(pRenderNode->GetScale());
+			pRenderNode->SetSceneNode(pSceneNode);
 
-	Ogre::Item* item = m_pSceneManager->createItem(strImportedMeshName,
+			m_RenderNodes.push_back(pRenderNode);
+			return;
+		}
+		catch (const std::exception& e)
+		{
+			ImportV1Mesh(pRenderNode->GetMeshName());
+		}
+		
+	}
+		
+
+	item = m_pSceneManager->createItem(strImportedMeshName,
 		Ogre::ResourceGroupManager::
 		AUTODETECT_RESOURCE_GROUP_NAME,
 		Ogre::SCENE_DYNAMIC);
 	Ogre::SceneNode* pSceneNode = m_pSceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)->
 		createChildSceneNode(Ogre::SCENE_DYNAMIC);
 	pSceneNode->attachObject(item);
-	pSceneNode->scale(0.1f, 0.1f, 0.1f); // TODO: move out to ecs
+	pSceneNode->scale(pRenderNode->GetScale()); // TODO: move out to ecs
 	
 	pRenderNode->SetSceneNode(pSceneNode);
 

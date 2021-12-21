@@ -14,6 +14,11 @@
 #include "../ECS/ecsScript.h"
 #include "../FileSystem/GEFile.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#define stat _stat
+
 template <typename T>
 struct EnumWrapper
 {
@@ -53,6 +58,7 @@ public:
 	Ogre::Quaternion GetOrientation() const;
 	std::string GetMeshName() const;
 	bool GetIsStatic() const;
+	time_t mod_time;
 
 private:
 	std::string m_strScriptPath;

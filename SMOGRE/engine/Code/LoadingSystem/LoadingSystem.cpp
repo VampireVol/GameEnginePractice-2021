@@ -26,6 +26,7 @@ void LoadingSystem::LoadFromXML(const std::string fileName)
 			currentCharacter.meshName = e->Attribute("meshName");
 			currentCharacter.scriptName = e->Attribute("scriptName");
 			currentCharacter.position = ParsePosition(e->Attribute("position"));
+			currentCharacter.scale = ParsePosition(e->Attribute("scale"));
 
 			m_pEntityManager->CreateEntity(currentCharacter);
 		}

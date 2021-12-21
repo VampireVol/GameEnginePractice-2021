@@ -49,6 +49,8 @@ void EntityManager::CreateEntity(const EntityInfo &fromSave)
 
 	Ogre::String strMeshName = fromSave.meshName;
 	RenderNode* pRenderNode = new RenderNode(nIndex, strMeshName);
+	pRenderNode->SetScale(fromSave.scale);
+	
 
 	newEntity.set(EntityIndex{ nIndex })
 		.set(RenderNodeComponent{ pRenderNode })
@@ -61,6 +63,7 @@ void EntityManager::CreateEntity(const EntityInfo &fromSave)
 	entity.pScriptNode = pScriptNode;
 	//entity.position = fromSave.position;
 	//entity.rotation = fromSave.rotation;
+	//entity.scale = fromSave.scale;
 	entity.idx = nIndex;
 
 	m_entityQueue[nIndex] = entity;

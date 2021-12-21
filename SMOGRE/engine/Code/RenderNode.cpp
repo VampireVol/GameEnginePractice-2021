@@ -22,6 +22,7 @@ void RenderNode::Init()
 {
 	m_vPosition = Ogre::Vector3::ZERO;
 	m_vCameraPosition = Ogre::Vector3::ZERO;
+	m_scale = Ogre::Vector3(1.0f, 1.0f, 1.0f);
 
 	Ogre::Radian radian(0.0f);
 	m_vOrientation = Ogre::Quaternion(radian, Ogre::Vector3(0.0f, 1.0f, 0.0f));
@@ -75,6 +76,16 @@ Ogre::Quaternion RenderNode::GetOrientation() const
 void RenderNode::SetOrientation(Ogre::Quaternion position)
 {
 	m_vOrientation = position;
+}
+
+Ogre::Vector3 RenderNode::GetScale() const
+{
+	return m_scale;
+}
+
+void RenderNode::SetScale(Ogre::Vector3 scale)
+{
+	m_scale = scale;
 }
 
 void RenderNode::SetSceneNode(Ogre::SceneNode* pSceneNode)
