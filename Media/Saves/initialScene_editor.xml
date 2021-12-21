@@ -1,4 +1,4 @@
-<scene name="initialScene.xml">
+<scene name="initialScene_editor.xml">
     <character scriptName="Pawn.lua" meshName="ogrehead.mesh" position="2.341000,0.000000,0.000000" scale="0.100000,0.100000,0.100000" />
     <character scriptName="Actor.lua" meshName="ogrehead.mesh" position="-3.010000,0.000000,0.000000" scale="0.100000,0.100000,0.100000" />
     <character scriptName="Actor.lua" meshName="ogrehead.mesh" position="-21.070000,0.000000,0.000000" scale="0.100000,0.100000,0.100000" />
