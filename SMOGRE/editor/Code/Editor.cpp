@@ -144,18 +144,15 @@ void CreateTree(std::vector<RenderNode*>& m_pRenderNodes, Ogre::Camera* camera) 
 	Ogre::Vector3 pos;
 	Ogre::Vector3 camPos = camera->getPosition();
 	Ogre::Quaternion orient;
-	ImGui::SliderFloat("cam pos x", &camPos.x, -100.0f, 100.0f);
-	ImGui::SliderFloat("cam pos y", &camPos.y, -100.0f, 100.0f);
-	ImGui::SliderFloat("cam pos z", &camPos.z, -100.0f, 100.0f);
+	ImGui::DragFloat3("cam pos", &camPos.x, 0.1f);
+
 	camera->setPosition(camPos);
 	for (auto& renderNode : m_pRenderNodes) {
 		if (ImGui::TreeNode((renderNode->GetMeshName() + std::to_string(renderNode->GetId())).c_str())) {
 			ImGui::TreePop();
 			Ogre::Vector3 pos = renderNode->GetPosition();
 
-			ImGui::SliderFloat((std::to_string(renderNode->GetId()) + "th pos x").c_str(), &pos.x, -100.0f, 100.0f);
-			ImGui::SliderFloat((std::to_string(renderNode->GetId()) + "th pos y").c_str(), &pos.y, -100.0f, 100.0f);
-			ImGui::SliderFloat((std::to_string(renderNode->GetId()) + "th pos z").c_str(), &pos.z, -100.0f, 100.0f);
+			ImGui::DragFloat3((" " + std::to_string(renderNode->GetId()) + " pos").c_str(), &pos.x, 0.1f);
 			renderNode->SetPosition(pos);
 		}
 	}
